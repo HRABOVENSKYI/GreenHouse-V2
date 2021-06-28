@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.dao.AirSensorDAO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorTemperatureDTO;
+import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
 import ua.lviv.iot.greenhouse.models.AirSensor;
 import ua.lviv.iot.greenhouse.services.AirSensorService;
@@ -61,87 +62,33 @@ public class AirSensorServiceImpl implements AirSensorService {
 
     @Override
     public List<AirSensorHumidityDTO> getHumidityData(String date) {
-        if (date == null) {
-            List<AirSensor> airSensorData = airSensorDAO.findAll(); // TODO: Read from the DB only needed fields
-
-            if (airSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data yet");
-            } else {
-                return airSensorData.stream()
-                        .map(airSensorD -> new AirSensorHumidityDTO(
-                                airSensorD.getData().getLocalDateTime(),
-                                airSensorD.getData().getAirHumidity()
-                                ))
-                        .collect(Collectors.toList());
-            }
-
-        } else {
-            LocalDate localDate = LocalDate.parse(date);
-
-            List<AirSensor> airSensorData = airSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            ); // TODO: Read from the DB only needed fields
-
-            if (airSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data for this time");
-            } else {
-                return airSensorData.stream()
-                        .map(airSensorD -> new AirSensorHumidityDTO(
-                                airSensorD.getData().getLocalDateTime(),
-                                airSensorD.getData().getAirHumidity()
-                        ))
-                        .collect(Collectors.toList());
-            }
-        }
+        return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
+                .map(sensorData -> new AirSensorHumidityDTO(
+                        sensorData.getData().getLocalDateTime(),
+                        sensorData.getData().getAirHumidity()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<AirSensorTemperatureDTO> getTemperatureData(String date) {
-        if (date == null) {
-            List<AirSensor> airSensorData = airSensorDAO.findAll(); // TODO: Read from the DB only needed fields
-
-            if (airSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data yet");
-            } else {
-                return airSensorData.stream()
-                        .map(airSensorD -> new AirSensorTemperatureDTO(
-                                airSensorD.getData().getLocalDateTime(),
-                                airSensorD.getData().getAirTemperature()
-                        ))
-                        .collect(Collectors.toList());
-            }
-
-        } else {
-            LocalDate localDate = LocalDate.parse(date);
-
-            List<AirSensor> airSensorData = airSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            ); // TODO: Read from the DB only needed fields
-
-            if (airSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data for this time");
-            } else {
-                return airSensorData.stream()
-                        .map(airSensorD -> new AirSensorTemperatureDTO(
-                                airSensorD.getData().getLocalDateTime(),
-                                airSensorD.getData().getAirTemperature()
-                        ))
-                        .collect(Collectors.toList());
-            }
-        }
+        return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
+                .map(sensorData -> new AirSensorTemperatureDTO(
+                        sensorData.getData().getLocalDateTime(),
+                        sensorData.getData().getAirTemperature()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public AirSensor updateDataById(Long id, double airHumidity, double airTemperature) {
-        if (!airSensorDAO.existsById(id)) {
-            throw new NoDataFoundException("There is no data for the air sensor with ID " + id);
+    public AirSensor updateDataById(AirSensorToUpdateDTO airSensorToUpdateDTO) {
+        if (!airSensorDAO.existsById(airSensorToUpdateDTO.getId())) {
+            throw new NoDataFoundException("There is no data for the air sensor with ID " + airSensorToUpdateDTO.getId());
         }
 
-        AirSensor sensor = airSensorDAO.findSensorById(id);
-        sensor.getData().setAirHumidity(airHumidity);
-        sensor.getData().setAirTemperature(airTemperature);
+        AirSensor sensor = airSensorDAO.findSensorById(airSensorToUpdateDTO.getId());
+        sensor.getData().setAirHumidity(airSensorToUpdateDTO.getAirHumidity());
+        sensor.getData().setAirTemperature(airSensorToUpdateDTO.getAirTemperature());
 
         return airSensorDAO.save(sensor);
     }

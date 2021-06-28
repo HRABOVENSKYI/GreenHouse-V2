@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
+import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.models.SoilSensor;
 import ua.lviv.iot.greenhouse.services.SoilSensorService;
 
@@ -47,6 +48,8 @@ public class SoilSensorController {
     @PutMapping("{id}")
     public SoilSensor updateCurrentDataById(final @RequestBody SoilSensorDTO soilSensorDTO,
                                            final @PathVariable("id") Long id) {
-        return soilSensorService.updateDataById(id, soilSensorDTO.getSoilHumidity(), soilSensorDTO.getSoilTemperature());
+        return soilSensorService.updateDataById(
+                new SoilSensorToUpdateDTO(id, soilSensorDTO.getSoilHumidity(), soilSensorDTO.getSoilTemperature())
+        );
     }
 }

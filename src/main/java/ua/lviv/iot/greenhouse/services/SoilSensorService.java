@@ -3,6 +3,7 @@ package ua.lviv.iot.greenhouse.services;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
+import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.models.SoilSensor;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface SoilSensorService {
 
     List<SoilSensorTemperatureDTO> getTemperatureData(String date);
 
-    SoilSensor updateDataById(Long id, double soilHumidity, double soilTemperature);
+    SoilSensor updateDataById(SoilSensorToUpdateDTO soilSensorToUpdateDTO);
 
     void deleteAllSensorData(String date);
 }

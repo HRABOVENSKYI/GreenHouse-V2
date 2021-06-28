@@ -3,6 +3,7 @@ package ua.lviv.iot.greenhouse.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
+import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 import ua.lviv.iot.greenhouse.services.LuminositySensorService;
 
@@ -35,6 +36,8 @@ public class LuminositySensorController {
     @PutMapping("{id}")
     public LuminositySensor updateCurrentDataById(final @RequestBody LuminositySensorDTO luminositySensorDTO,
                                            final @PathVariable("id") Long id) {
-        return luminositySensorService.updateDataById(id, luminositySensorDTO.getLuminosity());
+        return luminositySensorService.updateDataById(
+                new LuminositySensorToUpdateDTO(id, luminositySensorDTO.getLuminosity())
+        );
     }
 }

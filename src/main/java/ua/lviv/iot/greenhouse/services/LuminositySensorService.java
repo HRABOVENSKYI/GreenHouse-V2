@@ -1,6 +1,7 @@
 package ua.lviv.iot.greenhouse.services;
 
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
+import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface LuminositySensorService {
 
     List<LuminositySensor> getAllSensorData(String date);
 
-    LuminositySensor updateDataById(Long id, double luminosity);
+    LuminositySensor updateDataById(LuminositySensorToUpdateDTO luminositySensorToUpdateDTO);
 
     void deleteAllSensorData(String date);
 }

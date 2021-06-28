@@ -3,9 +3,11 @@ package ua.lviv.iot.greenhouse.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.greenhouse.dao.SoilSensorDAO;
+import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
+import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
 import ua.lviv.iot.greenhouse.models.SoilSensor;
 import ua.lviv.iot.greenhouse.services.SoilSensorService;
@@ -61,87 +63,33 @@ public class SoilSensorServiceImpl implements SoilSensorService {
 
     @Override
     public List<SoilSensorHumidityDTO> getHumidityData(String date) {
-        if (date == null) {
-            List<SoilSensor> soilSensorData = soilSensorDAO.findAll(); // TODO: Read from the DB only needed fields
-
-            if (soilSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data yet");
-            } else {
-                return soilSensorData.stream()
-                        .map(soilSensorD -> new SoilSensorHumidityDTO(
-                                soilSensorD.getData().getLocalDateTime(),
-                                soilSensorD.getData().getSoilHumidity()
-                        ))
-                        .collect(Collectors.toList());
-            }
-
-        } else {
-            LocalDate localDate = LocalDate.parse(date);
-
-            List<SoilSensor> soilSensorData = soilSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            ); // TODO: Read from the DB only needed fields
-
-            if (soilSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data for this time");
-            } else {
-                return soilSensorData.stream()
-                        .map(soilSensorD -> new SoilSensorHumidityDTO(
-                                soilSensorD.getData().getLocalDateTime(),
-                                soilSensorD.getData().getSoilHumidity()
-                        ))
-                        .collect(Collectors.toList());
-            }
-        }
+        return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
+                .map(sensorData -> new SoilSensorHumidityDTO(
+                        sensorData.getData().getLocalDateTime(),
+                        sensorData.getData().getSoilHumidity()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<SoilSensorTemperatureDTO> getTemperatureData(String date) {
-        if (date == null) {
-            List<SoilSensor> soilSensorData = soilSensorDAO.findAll(); // TODO: Read from the DB only needed fields
-
-            if (soilSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data yet");
-            } else {
-                return soilSensorData.stream()
-                        .map(soilSensorD -> new SoilSensorTemperatureDTO(
-                                soilSensorD.getData().getLocalDateTime(),
-                                soilSensorD.getData().getSoilTemperature()
-                        ))
-                        .collect(Collectors.toList());
-            }
-
-        } else {
-            LocalDate localDate = LocalDate.parse(date);
-
-            List<SoilSensor> soilSensorData = soilSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            ); // TODO: Read from the DB only needed fields
-
-            if (soilSensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data for this time");
-            } else {
-                return soilSensorData.stream()
-                        .map(soilSensorD -> new SoilSensorTemperatureDTO(
-                                soilSensorD.getData().getLocalDateTime(),
-                                soilSensorD.getData().getSoilTemperature()
-                        ))
-                        .collect(Collectors.toList());
-            }
-        }
+        return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
+                .map(sensorData -> new SoilSensorTemperatureDTO(
+                        sensorData.getData().getLocalDateTime(),
+                        sensorData.getData().getSoilTemperature()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public SoilSensor updateDataById(Long id, double soilHumidity, double soilTemperature) {
-        if (!soilSensorDAO.existsById(id)) {
-            throw new NoDataFoundException("There is no data for the soil sensor with ID " + id);
+    public SoilSensor updateDataById(SoilSensorToUpdateDTO soilSensorToUpdateDTO) {
+        if (!soilSensorDAO.existsById(soilSensorToUpdateDTO.getId())) {
+            throw new NoDataFoundException("There is no data for the soil sensor with ID " + soilSensorToUpdateDTO.getId());
         }
 
-        SoilSensor sensor = soilSensorDAO.findSensorById(id);
-        sensor.getData().setSoilHumidity(soilHumidity);
-        sensor.getData().setSoilTemperature(soilTemperature);
+        SoilSensor sensor = soilSensorDAO.findSensorById(soilSensorToUpdateDTO.getId());
+        sensor.getData().setSoilHumidity(soilSensorToUpdateDTO.getSoilHumidity());
+        sensor.getData().setSoilTemperature(soilSensorToUpdateDTO.getSoilTemperature());
 
         return soilSensorDAO.save(sensor);
     }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class LuminositySensor {
 
     @Id
@@ -23,12 +24,18 @@ public class LuminositySensor {
         this.data = data;
     }
 
+    public LuminositySensor(Long id, Data data) {
+        this.id = id;
+        this.data = data;
+    }
+
     @Embeddable
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
     @Setter
     @ToString
+    @EqualsAndHashCode
     public static class Data {
         private LocalDateTime localDateTime;
         private double luminosity;

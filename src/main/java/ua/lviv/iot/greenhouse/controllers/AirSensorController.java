@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorTemperatureDTO;
+import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.models.AirSensor;
 import ua.lviv.iot.greenhouse.services.AirSensorService;
 
@@ -47,6 +48,8 @@ public class AirSensorController {
     @PutMapping("{id}")
     public AirSensor updateCurrentDataById(final @RequestBody AirSensorDTO airSensorDTO,
                                            final @PathVariable("id") Long id) {
-        return airSensorService.updateDataById(id, airSensorDTO.getAirHumidity(), airSensorDTO.getAirTemperature());
+        return airSensorService.updateDataById(
+                new AirSensorToUpdateDTO(id, airSensorDTO.getAirHumidity(), airSensorDTO.getAirTemperature())
+        );
     }
 }

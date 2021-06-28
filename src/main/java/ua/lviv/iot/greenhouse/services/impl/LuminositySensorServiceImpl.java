@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.greenhouse.dao.LuminositySensorDAO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
+import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 import ua.lviv.iot.greenhouse.services.LuminositySensorService;
@@ -56,13 +57,14 @@ public class LuminositySensorServiceImpl implements LuminositySensorService {
     }
 
     @Override
-    public LuminositySensor updateDataById(Long id, double luminosity) {
-        if (!luminositySensorDAO.existsById(id)) {
-            throw new NoDataFoundException("There is no data for the luminosity sensor with ID " + id);
+    public LuminositySensor updateDataById(LuminositySensorToUpdateDTO luminositySensorToUpdateDTO) {
+        if (!luminositySensorDAO.existsById(luminositySensorToUpdateDTO.getId())) {
+            throw new NoDataFoundException("There is no data for the luminosity sensor with ID " +
+                    luminositySensorToUpdateDTO.getId());
         }
 
-        LuminositySensor sensor = luminositySensorDAO.findSensorById(id);
-        sensor.getData().setLuminosity(luminosity);
+        LuminositySensor sensor = luminositySensorDAO.findSensorById(luminositySensorToUpdateDTO.getId());
+        sensor.getData().setLuminosity(luminositySensorToUpdateDTO.getLuminosity());
 
         return luminositySensorDAO.save(sensor);
     }
