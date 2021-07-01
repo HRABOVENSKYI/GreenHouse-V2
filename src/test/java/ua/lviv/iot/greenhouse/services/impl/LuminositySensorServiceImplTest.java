@@ -7,8 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.lviv.iot.greenhouse.dao.LuminositySensorDAO;
-import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
+import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 
@@ -16,8 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,13 +54,7 @@ class LuminositySensorServiceImplTest {
     }
 
     @Test
-    void canGetAllSensorDataWhenDateIsNullAndThereIsData() {
-
-        // given
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        LuminositySensor luminositySensor = new LuminositySensor(new LuminositySensor.Data(dateTime, 70.6));
-
-        given(luminositySensorDAO.findAll()).willReturn(List.of(luminositySensor, luminositySensor)); // not empty list
+    void canGetAllSensorDataWhenDateIsNull() {
 
         // when
         luminositySensorService.getAllSensorData(null);
@@ -71,31 +64,10 @@ class LuminositySensorServiceImplTest {
     }
 
     @Test
-    void throwExceptionWhenDateIsNullAndThereIsNoData() {
-
-        // given
-        given(luminositySensorDAO.findAll()).willReturn(Collections.emptyList()); // not empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> luminositySensorService.getAllSensorData(null))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no luminosity sensor data yet");
-    }
-
-    @Test
-    void canGetAllSensorDataWhenDateIsGivenAndThereIsData() {
+    void canGetAllSensorDataWhenDateIsGiven() {
 
         // given
         LocalDate date = LocalDate.of(2021, Month.MAY, 1);
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        LuminositySensor luminositySensor = new LuminositySensor(new LuminositySensor.Data(dateTime, 70.6));
-
-        given(luminositySensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(List.of(luminositySensor, luminositySensor)); // not empty list
 
         // when
         luminositySensorService.getAllSensorData(date.toString());
@@ -108,32 +80,13 @@ class LuminositySensorServiceImplTest {
     }
 
     @Test
-    void throwExceptionWhenDateIsGivenAndThereIsNoData() {
-
-        // given
-        LocalDate date = LocalDate.of(2020, Month.MAY, 1);
-
-        given(luminositySensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(Collections.emptyList()); // empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> luminositySensorService.getAllSensorData(date.toString()))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no luminosity sensor data for this time");
-    }
-
-    @Test
     void canUpdateDataByIdWhenIdIsCorrect() {
 
         // given
         LuminositySensorToUpdateDTO luminositySensorToUpdateDTO = new LuminositySensorToUpdateDTO(1L, 60.8);
-        given(luminositySensorDAO.existsById(luminositySensorToUpdateDTO.getId())).willReturn(true);
         LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        LuminositySensor luminositySensor = new LuminositySensor(1L, new LuminositySensor.Data(dateTime, 70.6));
+        Optional<LuminositySensor> luminositySensor = Optional.of(
+                new LuminositySensor(1L, new LuminositySensor.Data(dateTime, 70.6)));
         given(luminositySensorDAO.findSensorById(luminositySensorToUpdateDTO.getId())).willReturn(luminositySensor);
 
         // when
@@ -148,6 +101,21 @@ class LuminositySensorServiceImplTest {
     }
 
     @Test
+    void throwExceptionWhileUpdatingDataByIdWhenSensorWithIdIsMissing() {
+
+        // given
+        LuminositySensorToUpdateDTO luminositySensorToUpdateDTO = new LuminositySensorToUpdateDTO(1L, 60.8);
+        given(luminositySensorDAO.findSensorById(luminositySensorToUpdateDTO.getId())).willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> luminositySensorService.updateDataById(luminositySensorToUpdateDTO))
+                .isInstanceOf(NoDataFoundException.class)
+                .hasMessageContaining("There is no data for the luminosity sensor with ID " +
+                        luminositySensorToUpdateDTO.getId());
+    }
+
+    @Test
     void canDeleteAllSensorDataWhenDateIsNull() {
 
         // when
@@ -155,5 +123,21 @@ class LuminositySensorServiceImplTest {
 
         // then
         verify(luminositySensorDAO).deleteAll();
+    }
+
+    @Test
+    void canDeleteAllSensorDataWhenDateIsGiven() {
+
+        // given
+        LocalDate date = LocalDate.of(2021, Month.MAY, 1);
+
+        // when
+        luminositySensorService.deleteAllSensorData(date.toString());
+
+        // then
+        verify(luminositySensorDAO).deleteSensorByData_LocalDateTimeBetween(
+                date.atTime(LocalTime.MIN),
+                date.atTime(LocalTime.MAX)
+        );
     }
 }

@@ -36,27 +36,15 @@ public class AirSensorServiceImpl implements AirSensorService {
     @Override
     public List<AirSensor> getAllSensorData(String date) {
         if (date == null) {
-            List<AirSensor> sensorData = airSensorDAO.findAll();
-
-            if (sensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data yet");
-            } else {
-                return sensorData;
-            }
+            return airSensorDAO.findAll();
 
         } else {
             LocalDate localDate = LocalDate.parse(date);
 
-            List<AirSensor> sensorData = airSensorDAO.findSensorByData_LocalDateTimeBetween(
+            return airSensorDAO.findSensorByData_LocalDateTimeBetween(
                     localDate.atTime(LocalTime.MIN),
                     localDate.atTime(LocalTime.MAX)
             );
-
-            if (sensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no air sensor data for this time");
-            } else {
-                return sensorData;
-            }
         }
     }
 
@@ -82,11 +70,10 @@ public class AirSensorServiceImpl implements AirSensorService {
 
     @Override
     public AirSensor updateDataById(AirSensorToUpdateDTO airSensorToUpdateDTO) {
-        if (!airSensorDAO.existsById(airSensorToUpdateDTO.getId())) {
-            throw new NoDataFoundException("There is no data for the air sensor with ID " + airSensorToUpdateDTO.getId());
-        }
+        AirSensor sensor = airSensorDAO.findSensorById(airSensorToUpdateDTO.getId())
+                .orElseThrow(() -> new NoDataFoundException("There is no data for the air sensor with ID " +
+                        airSensorToUpdateDTO.getId()));
 
-        AirSensor sensor = airSensorDAO.findSensorById(airSensorToUpdateDTO.getId());
         sensor.getData().setAirHumidity(airSensorToUpdateDTO.getAirHumidity());
         sensor.getData().setAirTemperature(airSensorToUpdateDTO.getAirTemperature());
 

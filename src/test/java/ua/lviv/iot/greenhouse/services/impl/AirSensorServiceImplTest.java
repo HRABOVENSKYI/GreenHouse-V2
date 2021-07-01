@@ -17,8 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,13 +55,7 @@ class AirSensorServiceImplTest {
     }
 
     @Test
-    void canGetAllSensorDataWhenDateIsNullAndThereIsData() {
-
-        // given
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        AirSensor airSensor = new AirSensor(new AirSensor.Data(dateTime, 70.6, 23.38));
-
-        given(airSensorDAO.findAll()).willReturn(List.of(airSensor, airSensor)); // not empty list
+    void canGetAllSensorDataWhenDateIsNull() {
 
         // when
         airSensorService.getAllSensorData(null);
@@ -72,31 +65,10 @@ class AirSensorServiceImplTest {
     }
 
     @Test
-    void throwExceptionWhenDateIsNullAndThereIsNoData() {
-
-        // given
-        given(airSensorDAO.findAll()).willReturn(Collections.emptyList()); // not empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> airSensorService.getAllSensorData(null))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no air sensor data yet");
-    }
-
-    @Test
-    void canGetAllSensorDataWhenDateIsGivenAndThereIsData() {
+    void canGetAllSensorDataWhenDateIsGiven() {
 
         // given
         LocalDate date = LocalDate.of(2021, Month.MAY, 1);
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        AirSensor airSensor = new AirSensor(new AirSensor.Data(dateTime, 70.6, 23.38));
-
-        given(airSensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(List.of(airSensor, airSensor)); // not empty list
 
         // when
         airSensorService.getAllSensorData(date.toString());
@@ -106,25 +78,6 @@ class AirSensorServiceImplTest {
                 date.atTime(LocalTime.MIN),
                 date.atTime(LocalTime.MAX)
         );
-    }
-
-    @Test
-    void throwExceptionWhenDateIsGivenAndThereIsNoData() {
-
-        // given
-        LocalDate date = LocalDate.of(2020, Month.MAY, 1);
-
-        given(airSensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(Collections.emptyList()); // empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> airSensorService.getAllSensorData(date.toString()))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no air sensor data for this time");
     }
 
     @Test
@@ -142,9 +95,9 @@ class AirSensorServiceImplTest {
 
         // given
         AirSensorToUpdateDTO airSensorToUpdateDTO = new AirSensorToUpdateDTO(1L, 60.8, 23.2);
-        given(airSensorDAO.existsById(airSensorToUpdateDTO.getId())).willReturn(true);
         LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        AirSensor airSensor = new AirSensor(1L, new AirSensor.Data(dateTime, 70.6, 23.38));
+        Optional<AirSensor> airSensor = Optional.of(
+                new AirSensor(1L, new AirSensor.Data(dateTime, 70.6, 23.38)));
         given(airSensorDAO.findSensorById(airSensorToUpdateDTO.getId())).willReturn(airSensor);
 
         // when
@@ -160,6 +113,21 @@ class AirSensorServiceImplTest {
     }
 
     @Test
+    void throwExceptionWhileUpdatingDataByIdWhenSensorWithIdIsMissing() {
+
+        // given
+        AirSensorToUpdateDTO airSensorToUpdateDTO = new AirSensorToUpdateDTO(1L, 60.8, 23.2);
+        given(airSensorDAO.findSensorById(airSensorToUpdateDTO.getId())).willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> airSensorService.updateDataById(airSensorToUpdateDTO))
+                .isInstanceOf(NoDataFoundException.class)
+                .hasMessageContaining("There is no data for the air sensor with ID " +
+                        airSensorToUpdateDTO.getId());
+    }
+
+    @Test
     void canDeleteAllSensorDataWhenDateIsNull() {
 
         // when
@@ -167,5 +135,21 @@ class AirSensorServiceImplTest {
 
         // then
         verify(airSensorDAO).deleteAll();
+    }
+
+    @Test
+    void canDeleteAllSensorDataWhenDateIsGiven() {
+
+        // given
+        LocalDate date = LocalDate.of(2021, Month.MAY, 1);
+
+        // when
+        airSensorService.deleteAllSensorData(date.toString());
+
+        // then
+        verify(airSensorDAO).deleteSensorByData_LocalDateTimeBetween(
+                date.atTime(LocalTime.MIN),
+                date.atTime(LocalTime.MAX)
+        );
     }
 }
