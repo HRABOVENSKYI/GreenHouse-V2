@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.dao.LuminositySensorDAO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.mappers.LuminositySensorMapper;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 import ua.lviv.iot.greenhouse.services.LuminositySensorService;
 
@@ -23,10 +24,8 @@ public class LuminositySensorServiceImpl implements LuminositySensorService {
 
     @Override
     public LuminositySensor createSensorData(LuminositySensorDTO luminositySensorDTO) {
-        return luminositySensorDAO.save(new LuminositySensor(new LuminositySensor.Data(
-                luminositySensorDTO.getLocalDateTime(),
-                luminositySensorDTO.getLuminosity()
-        )));
+        return luminositySensorDAO.save(LuminositySensorMapper
+                .mapLuminositySensorDTOtoLuminositySensor(luminositySensorDTO));
     }
 
     @Override

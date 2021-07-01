@@ -8,6 +8,7 @@ import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.mappers.SoilSensorMapper;
 import ua.lviv.iot.greenhouse.models.SoilSensor;
 import ua.lviv.iot.greenhouse.services.SoilSensorService;
 
@@ -26,11 +27,7 @@ public class SoilSensorServiceImpl implements SoilSensorService {
 
     @Override
     public SoilSensor createSensorData(SoilSensorDTO soilSensorDTO) {
-        return soilSensorDAO.save(new SoilSensor(new SoilSensor.Data(
-                soilSensorDTO.getLocalDateTime(),
-                soilSensorDTO.getSoilHumidity(),
-                soilSensorDTO.getSoilTemperature()
-        )));
+        return soilSensorDAO.save(SoilSensorMapper.mapSoilSensorDTOtoSoilSensor(soilSensorDTO));
     }
 
     @Override
@@ -51,20 +48,14 @@ public class SoilSensorServiceImpl implements SoilSensorService {
     @Override
     public List<SoilSensorHumidityDTO> getHumidityData(String date) {
         return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
-                .map(sensorData -> new SoilSensorHumidityDTO(
-                        sensorData.getData().getLocalDateTime(),
-                        sensorData.getData().getSoilHumidity()
-                ))
+                .map(SoilSensorMapper::mapSoilSensorToSoilSensorHumidityDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<SoilSensorTemperatureDTO> getTemperatureData(String date) {
         return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
-                .map(sensorData -> new SoilSensorTemperatureDTO(
-                        sensorData.getData().getLocalDateTime(),
-                        sensorData.getData().getSoilTemperature()
-                ))
+                .map(SoilSensorMapper::mapSoilSensorToSoilSensorTemperatureDTO)
                 .collect(Collectors.toList());
     }
 

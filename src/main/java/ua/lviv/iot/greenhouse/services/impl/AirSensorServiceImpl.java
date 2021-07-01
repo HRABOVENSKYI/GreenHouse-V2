@@ -8,6 +8,7 @@ import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorTemperatureDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.mappers.AirSensorMapper;
 import ua.lviv.iot.greenhouse.models.AirSensor;
 import ua.lviv.iot.greenhouse.services.AirSensorService;
 
@@ -26,11 +27,7 @@ public class AirSensorServiceImpl implements AirSensorService {
 
     @Override
     public AirSensor createSensorData(AirSensorDTO airSensorDTO) {
-        return airSensorDAO.save(new AirSensor(new AirSensor.Data(
-                airSensorDTO.getLocalDateTime(),
-                airSensorDTO.getAirHumidity(),
-                airSensorDTO.getAirTemperature()
-        )));
+        return airSensorDAO.save(AirSensorMapper.mapAirSensorDTOtoAirSensor(airSensorDTO));
     }
 
     @Override
@@ -51,20 +48,14 @@ public class AirSensorServiceImpl implements AirSensorService {
     @Override
     public List<AirSensorHumidityDTO> getHumidityData(String date) {
         return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
-                .map(sensorData -> new AirSensorHumidityDTO(
-                        sensorData.getData().getLocalDateTime(),
-                        sensorData.getData().getAirHumidity()
-                ))
+                .map(AirSensorMapper::mapAirSensorToAirSensorHumidityDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<AirSensorTemperatureDTO> getTemperatureData(String date) {
         return getAllSensorData(date).stream() // TODO: Read from the DB only needed fields
-                .map(sensorData -> new AirSensorTemperatureDTO(
-                        sensorData.getData().getLocalDateTime(),
-                        sensorData.getData().getAirTemperature()
-                ))
+                .map(AirSensorMapper::mapAirSensorToAirSensorTemperatureDTO)
                 .collect(Collectors.toList());
     }
 
