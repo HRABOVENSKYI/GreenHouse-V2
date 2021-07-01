@@ -10,6 +10,7 @@ import ua.lviv.iot.greenhouse.dao.LuminositySensorDAO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.exception.WrongDateFormatException;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 
 import java.time.LocalDate;
@@ -80,6 +81,20 @@ class LuminositySensorServiceImplTest {
     }
 
     @Test
+    void throwExceptionInGetAllSensorDataWhenWrongDateFormat() {
+
+        // given
+        String date = "2002.11.23";
+
+        // when
+        // then
+        assertThatThrownBy(() -> luminositySensorService.getAllSensorData(date))
+                .isInstanceOf(WrongDateFormatException.class)
+                .hasMessageContaining("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+    }
+
+    @Test
     void canUpdateDataByIdWhenIdIsCorrect() {
 
         // given
@@ -139,5 +154,19 @@ class LuminositySensorServiceImplTest {
                 date.atTime(LocalTime.MIN),
                 date.atTime(LocalTime.MAX)
         );
+    }
+
+    @Test
+    void throwExceptionInDeleteAllSensorDataWhenWrongDateFormat() {
+
+        // given
+        String date = "2002.11.23";
+
+        // when
+        // then
+        assertThatThrownBy(() -> luminositySensorService.deleteAllSensorData(date))
+                .isInstanceOf(WrongDateFormatException.class)
+                .hasMessageContaining("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
     }
 }

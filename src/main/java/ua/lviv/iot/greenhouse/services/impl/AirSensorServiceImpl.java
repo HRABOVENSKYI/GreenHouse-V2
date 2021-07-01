@@ -8,6 +8,7 @@ import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorTemperatureDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.exception.WrongDateFormatException;
 import ua.lviv.iot.greenhouse.mappers.AirSensorMapper;
 import ua.lviv.iot.greenhouse.models.AirSensor;
 import ua.lviv.iot.greenhouse.services.AirSensorService;
@@ -34,14 +35,18 @@ public class AirSensorServiceImpl implements AirSensorService {
     public List<AirSensor> getAllSensorData(String date) {
         if (date == null) {
             return airSensorDAO.findAll();
-
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            return airSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                return airSensorDAO.findSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 
@@ -76,12 +81,17 @@ public class AirSensorServiceImpl implements AirSensorService {
         if (date == null) {
             airSensorDAO.deleteAll();
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            airSensorDAO.deleteSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                airSensorDAO.deleteSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 }

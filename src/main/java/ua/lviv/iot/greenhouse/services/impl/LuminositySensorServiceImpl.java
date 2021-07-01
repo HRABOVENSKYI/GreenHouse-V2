@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.dao.LuminositySensorDAO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.dto.luminosity_sensor.LuminositySensorDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.exception.WrongDateFormatException;
 import ua.lviv.iot.greenhouse.mappers.LuminositySensorMapper;
 import ua.lviv.iot.greenhouse.models.LuminositySensor;
 import ua.lviv.iot.greenhouse.services.LuminositySensorService;
@@ -34,12 +35,17 @@ public class LuminositySensorServiceImpl implements LuminositySensorService {
             return luminositySensorDAO.findAll();
 
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            return luminositySensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                return luminositySensorDAO.findSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 
@@ -60,12 +66,17 @@ public class LuminositySensorServiceImpl implements LuminositySensorService {
         if (date == null) {
             luminositySensorDAO.deleteAll();
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            luminositySensorDAO.deleteSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                luminositySensorDAO.deleteSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 }

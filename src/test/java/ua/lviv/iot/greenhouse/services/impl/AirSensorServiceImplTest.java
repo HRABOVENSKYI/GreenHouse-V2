@@ -11,6 +11,7 @@ import ua.lviv.iot.greenhouse.dao.AirSensorDAO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorDTO;
 import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.exception.WrongDateFormatException;
 import ua.lviv.iot.greenhouse.models.AirSensor;
 
 import java.time.LocalDate;
@@ -78,6 +79,20 @@ class AirSensorServiceImplTest {
                 date.atTime(LocalTime.MIN),
                 date.atTime(LocalTime.MAX)
         );
+    }
+
+    @Test
+    void throwExceptionInGetAllSensorDataWhenWrongDateFormat() {
+
+        // given
+        String date = "2002.11.23";
+
+        // when
+        // then
+        assertThatThrownBy(() -> airSensorService.getAllSensorData(date))
+                .isInstanceOf(WrongDateFormatException.class)
+                .hasMessageContaining("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
     }
 
     @Test
@@ -151,5 +166,19 @@ class AirSensorServiceImplTest {
                 date.atTime(LocalTime.MIN),
                 date.atTime(LocalTime.MAX)
         );
+    }
+
+    @Test
+    void throwExceptionInDeleteAllSensorDataWhenWrongDateFormat() {
+
+        // given
+        String date = "2002.11.23";
+
+        // when
+        // then
+        assertThatThrownBy(() -> airSensorService.deleteAllSensorData(date))
+                .isInstanceOf(WrongDateFormatException.class)
+                .hasMessageContaining("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
     }
 }
