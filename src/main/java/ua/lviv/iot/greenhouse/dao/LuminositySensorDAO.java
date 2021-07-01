@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.models.LuminositySensor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LuminositySensorDAO extends JpaRepository<LuminositySensor, Long> {
@@ -14,5 +15,5 @@ public interface LuminositySensorDAO extends JpaRepository<LuminositySensor, Lon
 
     void deleteSensorByData_LocalDateTimeBetween(LocalDateTime after, LocalDateTime before);
 
-    LuminositySensor findSensorById(Long id);
+    Optional<LuminositySensor> findSensorById(Long id);
 }

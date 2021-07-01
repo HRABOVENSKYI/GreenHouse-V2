@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.models.SoilSensor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SoilSensorDAO extends JpaRepository<SoilSensor, Long> {
@@ -14,5 +15,5 @@ public interface SoilSensorDAO extends JpaRepository<SoilSensor, Long> {
 
     void deleteSensorByData_LocalDateTimeBetween(LocalDateTime after, LocalDateTime before);
 
-    SoilSensor findSensorById(Long id);
+    Optional<SoilSensor> findSensorById(Long id);
 }

@@ -6,6 +6,7 @@ import ua.lviv.iot.greenhouse.models.AirSensor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AirSensorDAO extends JpaRepository<AirSensor, Long> {
@@ -14,5 +15,5 @@ public interface AirSensorDAO extends JpaRepository<AirSensor, Long> {
 
     void deleteSensorByData_LocalDateTimeBetween(LocalDateTime after, LocalDateTime before);
 
-    AirSensor findSensorById(Long id);
+    Optional<AirSensor> findSensorById(Long id);
 }

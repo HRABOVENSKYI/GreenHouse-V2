@@ -3,7 +3,6 @@ package ua.lviv.iot.greenhouse.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.greenhouse.dao.SoilSensorDAO;
-import ua.lviv.iot.greenhouse.dto.air_sensor.AirSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
@@ -37,27 +36,15 @@ public class SoilSensorServiceImpl implements SoilSensorService {
     @Override
     public List<SoilSensor> getAllSensorData(String date) {
         if (date == null) {
-            List<SoilSensor> sensorData = soilSensorDAO.findAll();
-
-            if (sensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data yet");
-            } else {
-                return sensorData;
-            }
+            return soilSensorDAO.findAll();
 
         } else {
             LocalDate localDate = LocalDate.parse(date);
 
-            List<SoilSensor> sensorData = soilSensorDAO.findSensorByData_LocalDateTimeBetween(
+            return soilSensorDAO.findSensorByData_LocalDateTimeBetween(
                     localDate.atTime(LocalTime.MIN),
                     localDate.atTime(LocalTime.MAX)
             );
-
-            if (sensorData.isEmpty()) {
-                throw new NoDataFoundException("There is no soil sensor data for this time");
-            } else {
-                return sensorData;
-            }
         }
     }
 
@@ -83,11 +70,10 @@ public class SoilSensorServiceImpl implements SoilSensorService {
 
     @Override
     public SoilSensor updateDataById(SoilSensorToUpdateDTO soilSensorToUpdateDTO) {
-        if (!soilSensorDAO.existsById(soilSensorToUpdateDTO.getId())) {
-            throw new NoDataFoundException("There is no data for the soil sensor with ID " + soilSensorToUpdateDTO.getId());
-        }
+        SoilSensor sensor = soilSensorDAO.findSensorById(soilSensorToUpdateDTO.getId())
+                .orElseThrow(() -> new NoDataFoundException("There is no data for the soil sensor with ID " +
+                        soilSensorToUpdateDTO.getId()));
 
-        SoilSensor sensor = soilSensorDAO.findSensorById(soilSensorToUpdateDTO.getId());
         sensor.getData().setSoilHumidity(soilSensorToUpdateDTO.getSoilHumidity());
         sensor.getData().setSoilTemperature(soilSensorToUpdateDTO.getSoilTemperature());
 

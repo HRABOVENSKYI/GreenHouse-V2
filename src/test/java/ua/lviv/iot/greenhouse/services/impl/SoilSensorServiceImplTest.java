@@ -17,8 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,13 +55,7 @@ class SoilSensorServiceImplTest {
     }
 
     @Test
-    void canGetAllSensorDataWhenDateIsNullAndThereIsData() {
-
-        // given
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        SoilSensor soilSensor = new SoilSensor(new SoilSensor.Data(dateTime, 70.6, 23.38));
-
-        given(soilSensorDAO.findAll()).willReturn(List.of(soilSensor, soilSensor)); // not empty list
+    void canGetAllSensorDataWhenDateIsNull() {
 
         // when
         soilSensorService.getAllSensorData(null);
@@ -72,31 +65,10 @@ class SoilSensorServiceImplTest {
     }
 
     @Test
-    void throwExceptionWhenDateIsNullAndThereIsNoData() {
-
-        // given
-        given(soilSensorDAO.findAll()).willReturn(Collections.emptyList()); // not empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> soilSensorService.getAllSensorData(null))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no soil sensor data yet");
-    }
-
-    @Test
-    void canGetAllSensorDataWhenDateIsGivenAndThereIsData() {
+    void canGetAllSensorDataWhenDateIsGiven() {
 
         // given
         LocalDate date = LocalDate.of(2021, Month.MAY, 1);
-        LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        SoilSensor soilSensor = new SoilSensor(new SoilSensor.Data(dateTime, 70.6, 23.38));
-
-        given(soilSensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(List.of(soilSensor, soilSensor)); // not empty list
 
         // when
         soilSensorService.getAllSensorData(date.toString());
@@ -106,25 +78,6 @@ class SoilSensorServiceImplTest {
                 date.atTime(LocalTime.MIN),
                 date.atTime(LocalTime.MAX)
         );
-    }
-
-    @Test
-    void throwExceptionWhenDateIsGivenAndThereIsNoData() {
-
-        // given
-        LocalDate date = LocalDate.of(2020, Month.MAY, 1);
-
-        given(soilSensorDAO.findSensorByData_LocalDateTimeBetween(
-                date.atTime(LocalTime.MIN),
-                date.atTime(LocalTime.MAX)
-        ))
-                .willReturn(Collections.emptyList()); // empty list
-
-        // when
-        // then
-        assertThatThrownBy(() -> soilSensorService.getAllSensorData(date.toString()))
-                .isInstanceOf(NoDataFoundException.class)
-                .hasMessageContaining("There is no soil sensor data for this time");
     }
 
     @Test
@@ -142,9 +95,9 @@ class SoilSensorServiceImplTest {
 
         // given
         SoilSensorToUpdateDTO soilSensorToUpdateDTO = new SoilSensorToUpdateDTO(1L, 60.8, 23.2);
-        given(soilSensorDAO.existsById(soilSensorToUpdateDTO.getId())).willReturn(true);
         LocalDateTime dateTime = LocalDateTime.of(2021, Month.MAY, 1, 23, 45, 2);
-        SoilSensor soilSensor = new SoilSensor(1L, new SoilSensor.Data(dateTime, 70.6, 23.38));
+        Optional<SoilSensor> soilSensor = Optional.of(
+                new SoilSensor(1L, new SoilSensor.Data(dateTime, 70.6, 23.38)));
         given(soilSensorDAO.findSensorById(soilSensorToUpdateDTO.getId())).willReturn(soilSensor);
 
         // when
@@ -160,6 +113,21 @@ class SoilSensorServiceImplTest {
     }
 
     @Test
+    void throwExceptionWhileUpdatingDataByIdWhenSensorWithIdIsMissing() {
+
+        // given
+        SoilSensorToUpdateDTO soilSensorToUpdateDTO = new SoilSensorToUpdateDTO(1L, 60.8, 23.2);
+        given(soilSensorDAO.findSensorById(soilSensorToUpdateDTO.getId())).willReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> soilSensorService.updateDataById(soilSensorToUpdateDTO))
+                .isInstanceOf(NoDataFoundException.class)
+                .hasMessageContaining("There is no data for the soil sensor with ID " +
+                        soilSensorToUpdateDTO.getId());
+    }
+
+    @Test
     void canDeleteAllSensorDataWhenDateIsNull() {
 
         // when
@@ -167,5 +135,21 @@ class SoilSensorServiceImplTest {
 
         // then
         verify(soilSensorDAO).deleteAll();
+    }
+
+    @Test
+    void canDeleteAllSensorDataWhenDateIsGiven() {
+
+        // given
+        LocalDate date = LocalDate.of(2021, Month.MAY, 1);
+
+        // when
+        soilSensorService.deleteAllSensorData(date.toString());
+
+        // then
+        verify(soilSensorDAO).deleteSensorByData_LocalDateTimeBetween(
+                date.atTime(LocalTime.MIN),
+                date.atTime(LocalTime.MAX)
+        );
     }
 }
