@@ -24,4 +24,19 @@ public class ApiExceptionHandler {
         // Return response entity
         return new ResponseEntity<>(apiException, notFound);
     }
+
+    @ExceptionHandler(value = {WrongDateFormatException.class})
+    public ResponseEntity<Object> handleWrongDateFormatException(WrongDateFormatException e) {
+        // Create payload containing exception details
+        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                badRequest,
+                ZonedDateTime.now()
+        );
+
+        // Return response entity
+        return new ResponseEntity<>(apiException, badRequest);
+    }
 }

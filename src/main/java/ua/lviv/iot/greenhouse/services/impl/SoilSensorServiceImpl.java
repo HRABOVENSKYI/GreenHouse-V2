@@ -8,6 +8,7 @@ import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorHumidityDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorTemperatureDTO;
 import ua.lviv.iot.greenhouse.dto.soil_sesnor.SoilSensorToUpdateDTO;
 import ua.lviv.iot.greenhouse.exception.NoDataFoundException;
+import ua.lviv.iot.greenhouse.exception.WrongDateFormatException;
 import ua.lviv.iot.greenhouse.mappers.SoilSensorMapper;
 import ua.lviv.iot.greenhouse.models.SoilSensor;
 import ua.lviv.iot.greenhouse.services.SoilSensorService;
@@ -34,14 +35,18 @@ public class SoilSensorServiceImpl implements SoilSensorService {
     public List<SoilSensor> getAllSensorData(String date) {
         if (date == null) {
             return soilSensorDAO.findAll();
-
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            return soilSensorDAO.findSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                return soilSensorDAO.findSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 
@@ -76,12 +81,17 @@ public class SoilSensorServiceImpl implements SoilSensorService {
         if (date == null) {
             soilSensorDAO.deleteAll();
         } else {
-            LocalDate localDate = LocalDate.parse(date);
+            try {
+                LocalDate localDate = LocalDate.parse(date);
 
-            soilSensorDAO.deleteSensorByData_LocalDateTimeBetween(
-                    localDate.atTime(LocalTime.MIN),
-                    localDate.atTime(LocalTime.MAX)
-            );
+                soilSensorDAO.deleteSensorByData_LocalDateTimeBetween(
+                        localDate.atTime(LocalTime.MIN),
+                        localDate.atTime(LocalTime.MAX)
+                );
+            } catch (Exception e) {
+                throw new WrongDateFormatException("Wrong date format. Change to match yyyy-mm-dd and " +
+                        "and make sure entered values are valid");
+            }
         }
     }
 }
