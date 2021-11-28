@@ -96,12 +96,12 @@ class SoilSensorServiceImplTest {
     }
 
     @Test
-    @Disabled // Test completely depends on getAllSensorData() method, which is tested
+    @Disabled("Test completely depends on getAllSensorData() method, which is tested")
     void canGetHumidityData() {
     }
 
     @Test
-    @Disabled // Test completely depends on getAllSensorData() method, which is tested
+    @Disabled("Test completely depends on getAllSensorData() method, which is tested")
     void canGetTemperatureData() {
     }
 
