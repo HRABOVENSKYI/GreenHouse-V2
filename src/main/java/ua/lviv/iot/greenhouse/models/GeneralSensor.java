@@ -5,13 +5,14 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name = "luminosity_sensor")
+@Entity(name = "general_sensor")
 @Table
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class LuminositySensor {
+public class GeneralSensor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,12 +20,7 @@ public class LuminositySensor {
     @Embedded
     private Data data;
 
-    public LuminositySensor(Data data) {
-        this.data = data;
-    }
-
-    public LuminositySensor(Long id, Data data) {
-        this.id = id;
+    public GeneralSensor(Data data) {
         this.data = data;
     }
 
@@ -36,7 +32,10 @@ public class LuminositySensor {
     @ToString
     @EqualsAndHashCode
     public static class Data {
-        private LocalDateTime localDateTime;
-        private double luminosity;
+        private Double temperature;
+        private Double humidity;
+        private Double luminosity;
+        private Double soilMoisture;
+        private LocalDateTime time;
     }
 }
